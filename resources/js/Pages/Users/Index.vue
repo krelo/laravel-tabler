@@ -2,10 +2,24 @@
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 import {Head} from '@inertiajs/vue3';
 import TableHead from "./TableHead.vue";
+import TextCell from './TextCell.vue';
+import DateCell from './DateCell.vue';
+import StatusCell from './StatusCell.vue';
+
 const props = defineProps<{
     data: App.Data.UserIndexViewModel;
 }>();
-   console.log(props.data);
+
+const getType = (type: string) => {
+    switch (type){
+    case 'Status':
+        return StatusCell;
+    case 'Date':
+        return DateCell;
+    default:
+        return TextCell;
+    }
+}
 </script>
 
 <template>
@@ -25,9 +39,7 @@ const props = defineProps<{
             </thead>
             <tbody>
                 <tr v-for="row in data.collection.data">
-                    <td class="pl-4" v-for="column in data.columns">
-                        {{row[column.key]}}
-                    </td>
+                <component :is="getType(column.type)" :data="(row[column.key] as never)" v-for="column in data.columns"/>
                 </tr>
             </tbody>
         </table>

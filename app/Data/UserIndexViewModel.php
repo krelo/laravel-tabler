@@ -8,16 +8,20 @@ use Spatie\LaravelData\Data;
 use Spatie\LaravelData\DataCollection;
 use Spatie\LaravelData\PaginatedDataCollection;
 use Spatie\QueryBuilder\QueryBuilder;
+use Spatie\TypeScriptTransformer\Attributes\LiteralTypeScriptType;
 use Spatie\TypeScriptTransformer\Attributes\TypeScript;
+use Spatie\TypeScriptTransformer\Attributes\TypeScriptTransformer;
 
 #[TypeScript]
 class UserIndexViewModel extends Data
 {
+    const type = 'App.Data.UserTableData';
+
     public function __construct(
         #[DataCollectionOf(UserTableData::class)]
         public readonly PaginatedDataCollection $collection,
-        #[DataCollectionOf(Column::class)]
-        public readonly DataCollection $columns
+        #[LiteralTypeScriptType('Array<App.Data.Column<'.self::type.'>>'), DataCollectionOf(Column::class)]
+        public readonly array $columns
     )
     {
     }
@@ -33,7 +37,7 @@ class UserIndexViewModel extends Data
             UserTableData::collection(QueryBuilder::for(User::class)
                 ->allowedSorts($sortable)
                 ->paginate()),
-            $columns
+            $columns->toArray()
         );
     }
 
@@ -69,7 +73,7 @@ class UserIndexViewModel extends Data
                 $data[$name] = $args[$index];
             }
             else if($parameter->isOptional() && $parameter->getDefaultValue() == null) {
-                $data[$name] = $classParameter->getName();
+                $data[$name] = \Str::snake($classParameter->getName());
             }
             $index++;
         }
